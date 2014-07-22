@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-puts "This script will take 2 directories from input and compare the file content by name of the files"
+puts "This script will take 2 directories from input and compare the file content by name of the files."
 
 dir1=ARGV[0]
 dir2=ARGV[1]
