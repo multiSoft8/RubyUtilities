@@ -106,11 +106,11 @@ begin
 			newValue = statusNew["#{stat}"]
 			if newValue != value
 				diff = newValue.to_i - value.to_i
-				puts "#{stat} => old=#{value} new=#{newValue} diff=#{diff}"
+				puts "#{diff}\t\t#{stat}" 
 			end
 		end
 		count += 1
-		puts "Iter #{count}"
+		puts "###########################{count}"
 	end
 rescue Mysql::Error => e
 	puts "ERROR, #{e.errno} - #{e.error}"
