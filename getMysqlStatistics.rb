@@ -143,14 +143,21 @@ begin
 			puts "###########################{count}"
 		end
 	elsif action.eql?("getStatusVariablesForQuery")
+		count = 0
 		fileHandler = File.open(queryFile, "r")
 		queryData = fileHandler.read
 		fileHandler.close()
 		connection.query("flush status;")
+		queryFinal = ""
 		queryData.each do |queryLine|
-			connection.query(queryLine)
+			if queryLine.include?(";")
+				queryFinal << queryLine
+				connection.query(queryFinal)
+			else
+				queryFinal << queryLine
+			end
 		end
-		resource = connection.query("show status")
+		resource = connection.query("show global status")
 		resource.each do |stat, value|
 			puts "#{value}\t\t\t#{stat}" if !value.eql?("0")
 		end
