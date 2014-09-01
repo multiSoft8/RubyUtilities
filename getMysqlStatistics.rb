@@ -5,11 +5,20 @@ require 'mysql'
 username=nil
 password=nil
 host=nil
+database=nil
 port=nil
 iterations=nil
 queryFile=nil
 action=nil
 getProfile=nil
+replaceInQueryFile=nil
+
+def replaceInQuery (queryString, repValue)
+	if !repValue.nil?
+		queryString.gsub!("inputValue",repValue)
+	end
+	queryString
+end
 
 def help
         puts "###################"
@@ -45,6 +54,9 @@ while argCount < limit
         when "--host"
                 argCount += 1
                 host=ARGV[argCount]
+	when "--database"
+		argCount += 1
+		database=ARGV[argCount]
         when "--port"
                 argCount += 1
                 port=ARGV[argCount]
@@ -55,6 +67,9 @@ while argCount < limit
 	when "--setqueryfile"
 		argCount += 1
 		queryFile=ARGV[argCount]	
+	when "--replacequeryinputvalue"
+		argCount += 1
+		replaceInQueryFile=ARGV[argCount]
 	when "--action"
 		argCount += 1
 		action=ARGV[argCount]
@@ -113,7 +128,11 @@ statusNew = Hash.new
 variables = Hash.new
 
 begin
-	connection = Mysql.new(host, username, password)
+	if database.nil? 
+		connection = Mysql.new(host, username, password) 
+	else
+		connection = Mysql.new(host, username, password, database)
+	end
 	puts "INFO #{connection.get_server_info}"
 
 	if action.eql?("getStatusVariablesDiff")
@@ -165,9 +184,14 @@ begin
 		fileHandler = File.open(queryFile, "r")
 		queryData = fileHandler.read
 		fileHandler.close()
+		queryData = replaceInQuery(queryData,replaceInQueryFile)
 		connection.query("set profiling=1")
-		queryData.each do |queryLine|
-			connection.query(queryLine)
+		puts queryData.split(";").count
+		puts queryData.split(";").last
+		queryData.split(";").each do |queryLine|
+			if !queryLine.nil? and !queryLine.eql?(';') and !queryLine.match(/^$/)
+				connection.query("#{queryLine}")
+			end
 		end
 		resource = connection.query("show profile")
 		resource.each do |stat, value|
