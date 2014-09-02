@@ -186,8 +186,6 @@ begin
 		fileHandler.close()
 		queryData = replaceInQuery(queryData,replaceInQueryFile)
 		connection.query("set profiling=1")
-		puts queryData.split(";").count
-		puts queryData.split(";").last
 		queryData.split(";").each do |queryLine|
 			if !queryLine.nil? and !queryLine.eql?(';') and !queryLine.match(/^$/)
 				connection.query("#{queryLine}")
@@ -196,7 +194,24 @@ begin
 		resource = connection.query("show profile")
 		resource.each do |stat, value|
 			puts "#{value}\t\t\t#{stat}"
-		end		
+		end	
+	elsif action.eql?("getExplain")
+		fileHandler = File.open(queryFile, "r")
+		queryData = fileHandler.read
+		fileHandler.close()
+		queryData = replaceInQuery(queryData,replaceInQueryFile)
+		queryData.split(";").each do |queryLine|
+			if !queryLine.nil? and !queryLine.eql?(';') and !queryLine.match(/^$/)
+				queryLine = "explain #{queryLine}"
+				resource = connection.query("#{queryLine}")
+				resource.each do | line|
+					line.each do |value|
+						puts value
+					end
+					puts "######################"
+				end
+			end
+		end	
 	end
 rescue Mysql::Error => e
 	puts "ERROR, #{e.errno} - #{e.error}"
