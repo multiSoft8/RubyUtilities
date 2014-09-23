@@ -47,6 +47,10 @@ config_list.each do |path|
 		checked_list = "#{checked_list} #{path}"
 	else
 		puts "ProblemPath=#{path}"
+		if path.match(/\*$/)
+			puts "expading..."
+			checked_list = "#{checked_list} #{path}"
+		end
 	end
 end
 time=Time.new.to_i
